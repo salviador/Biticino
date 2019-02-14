@@ -2,11 +2,12 @@
 
 
  - **"Arduino"**
-> Written w![enter image description here](https://raw.githubusercontent.com/salviador/Biticino/master/arduino.png)
 <p align="center">
-  <img width="550" src="https://raw.githubusercontent.com/salviador/Biticino/master/arduino.png">
+  <img width="650" src="https://raw.githubusercontent.com/salviador/Biticino/master/arduino.png">
 </p>
 
  - **"ESP8266"**
-> Written w![enter image description here](https://raw.githubusercontent.com/salviador/Biticino/master/ESP8266.png)
+<p align="center">
+  <img width="650" src="https://raw.githubusercontent.com/salviador/Biticino/master/ESP8266.png">
+</p>
 
