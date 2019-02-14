@@ -89,7 +89,7 @@ class Interfaccia
   
     void Loop_Seriale();
     
-    int8_t Interfaccia::interfaccia_send_COMANDO(uint8_t A, uint8_t PL,  uint8_t stato, uint8_t attendi_risposta);
+    int8_t interfaccia_send_COMANDO(uint8_t A, uint8_t PL,  uint8_t stato, uint8_t attendi_risposta);
    
     
     void Add_Obj_Interface(abstractinterface *i){
@@ -99,7 +99,7 @@ class Interfaccia
     
   private:
     int _ctn_interfacee;
-    abstractinterface* _interfacee[10];
+    abstractinterface* _interfacee[20];
 
 
     //Gestione Seriale
@@ -171,9 +171,10 @@ class Serranda : public abstractinterface
     Serranda(Interfaccia* i);
 
     //COMANDI
-    void Salita();
-    void Discesa();
+    void Alza();
+    void Abbassa();
     void Toggle();
+    void Stop();
 
     void address(const uint8_t A, const uint8_t PL){
       Set_Address_A(A);

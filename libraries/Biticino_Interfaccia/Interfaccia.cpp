@@ -334,7 +334,7 @@ Serranda::Serranda(Interfaccia* i){
   _interfaccia->Add_Obj_Interface(this);
   Set_Stato(0);
 }
-void Serranda::Salita(void){
+void Serranda::Alza(void){
   uint8_t stato_rele=0;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x0A, 1);
@@ -344,7 +344,7 @@ void Serranda::Salita(void){
   }
   Set_Stato(stato_rele);
 }
-void Serranda::Discesa(void){
+void Serranda::Abbassa(void){
   uint8_t stato_rele=0;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x0A, 1);
@@ -354,6 +354,13 @@ void Serranda::Discesa(void){
   }
   Set_Stato(stato_rele);
 }
+void Serranda::Stop(void){
+  uint8_t stato_rele=0;
+
+  stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x0A, 1);
+}
+
+
 void Serranda::Toggle(void){
   uint8_t stato_rele;
 
