@@ -2,8 +2,8 @@
 
 
  - **"Arduino"**
-> Written w![enter image description here](https://raw.githubusercontent.com/salviador/Biticino/arduino.png)
+> Written w![enter image description here](https://raw.githubusercontent.com/salviador/Biticino/master/arduino.png)
 
  - **"ESP8266"**
-> Written w![enter image description here](https://raw.githubusercontent.com/salviador/Biticino/ESP8266.png)
+> Written w![enter image description here](https://raw.githubusercontent.com/salviador/Biticino/master/ESP8266.png)
 
