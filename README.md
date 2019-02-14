@@ -4,7 +4,7 @@
  - **"Arduino"**
 > Written w![enter image description here](https://raw.githubusercontent.com/salviador/Biticino/master/arduino.png)
 <p align="center">
-  <img width="460" height="300" src="https://raw.githubusercontent.com/salviador/Biticino/master/arduino.png">
+  <img width="550" src="https://raw.githubusercontent.com/salviador/Biticino/master/arduino.png">
 </p>
 
  - **"ESP8266"**
