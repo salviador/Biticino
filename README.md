@@ -8,6 +8,6 @@
 
  - **"ESP8266 Power supply by Bus"**
 <p align="center">
-  <img width="650" src="https://raw.githubusercontent.com/salviador/Biticino/master/ESP8266.png">
+  <img width="650" src="https://raw.githubusercontent.com/salviador/Biticino/master/ESP8266v.png">
 </p>
 
