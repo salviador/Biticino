@@ -28,8 +28,8 @@ int8_t Interfaccia::search_TRAMA(uint8_t START, uint8_t FINISH){
 	int8_t risultato = 0;
 
 	while(scs->available()>0){
-//		Serial.print("[SERIAL_AVAIABLE]: ");
 		val = scs->read();
+		
 		//Serial.println(val, HEX);
 		switch(STATE_MACHINE_Read_TRAMA){
 			case 0:	
@@ -121,6 +121,9 @@ void Interfaccia::Loop_Seriale(){
 		//Trama TROVATA
 		if(BYTE_TRAMA[1] == 0xB8){	//Richiesta Comando
 	
+	
+	//Serial.println("vvvvvvvvvvvvvvvv");
+	
 			// verifica indirizzi Interessati delle varie interfaccie caricate
 
       for(int i=0; i<_ctn_interfacee; i++){
@@ -140,6 +143,7 @@ void Interfaccia::Loop_Seriale(){
 
           if(add == BYTE_TRAMA[2]){	//A+PL corisponde
              _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);
+			// Serial.println(" _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);");
           }	
         }else if(t==SERRANDA){
           //Vedi se la risposta della seriale � compatibile con questo indirizzo
@@ -297,18 +301,21 @@ Switch::Switch(Interfaccia* i){
 
   _interfaccia->Add_Obj_Interface(this);
   Set_Stato(0);
+  Reset_Change_Stato();
 }
 void Switch::On(void){
   uint8_t stato_rele=0;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0, 1);
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
 }
 void Switch::Off(void){
   uint8_t stato_rele=1;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 1, 1);
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
 }
 void Switch::Toggle(void){
   uint8_t stato_rele;
@@ -318,6 +325,15 @@ void Switch::Toggle(void){
   }
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), stato_rele, 1);
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
+}
+uint8_t Switch::Stato(void){
+  uint8_t stato_rele;
+  stato_rele = 1;
+  if(Get_Stato() == 1){
+    stato_rele = 0;
+  }
+  return stato_rele;
 }
 
 
@@ -333,6 +349,7 @@ Serranda::Serranda(Interfaccia* i){
 
   _interfaccia->Add_Obj_Interface(this);
   Set_Stato(0);
+  Reset_Change_Stato();
 }
 void Serranda::Alza(void){
   uint8_t stato_rele=0;
@@ -343,6 +360,7 @@ void Serranda::Alza(void){
     stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x08, 1);
   }
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
 }
 void Serranda::Abbassa(void){
   uint8_t stato_rele=0;
@@ -353,6 +371,7 @@ void Serranda::Abbassa(void){
     stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x09, 1);
   }
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
 }
 void Serranda::Stop(void){
   uint8_t stato_rele=0;
@@ -373,6 +392,7 @@ void Serranda::Toggle(void){
     }
     stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), stato_rele, 1);
     Set_Stato(stato_rele);
+    Reset_Change_Stato();
   } 
 }
 
@@ -392,18 +412,21 @@ GruppoSwitch::GruppoSwitch(Interfaccia* i){
 
   _interfaccia->Add_Obj_Interface(this);
   Set_Stato(0);
+  Reset_Change_Stato();
 }
 void GruppoSwitch::On(void){
   uint8_t stato_rele=0;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0, 0);
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
 }
 void GruppoSwitch::Off(void){
   uint8_t stato_rele=1;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 1, 0);
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
 }
 void GruppoSwitch::Toggle(void){
   uint8_t stato_rele;
@@ -413,5 +436,6 @@ void GruppoSwitch::Toggle(void){
   }
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), stato_rele, 0);
   Set_Stato(stato_rele);
+  Reset_Change_Stato();
 }
 

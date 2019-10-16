@@ -58,11 +58,24 @@ class abstractinterface
 
     void Set_Stato(uint8_t stato){
       _statoInterfaccia=stato;
+      _CHANGEstatoInterfaccia = true;
     }
-    uint8_t Get_Stato() const{
+    uint8_t Get_Stato() {
+      //_CHANGEstatoInterfaccia = false;
       return _statoInterfaccia;
     }
+    bool Is_Change_Stato(){
+      if(_CHANGEstatoInterfaccia){
+        _CHANGEstatoInterfaccia = false;  //Reset
 
+        return true;
+      }
+      return false;
+    }
+    void Reset_Change_Stato() {
+        _CHANGEstatoInterfaccia = false;  //Reset
+    }
+    
     
   private:
     TYPE_INTERfACCIA_t _type;
@@ -71,6 +84,7 @@ class abstractinterface
     uint8_t Address_PL;
 
     uint8_t _statoInterfaccia;
+    bool _CHANGEstatoInterfaccia;
 
 };
 
@@ -99,7 +113,7 @@ class Interfaccia
     
   private:
     int _ctn_interfacee;
-    abstractinterface* _interfacee[20];
+    abstractinterface* _interfacee[40];
 
 
     //Gestione Seriale
@@ -143,6 +157,7 @@ class Switch : public abstractinterface
     void On();
     void Off();
     void Toggle();
+    uint8_t Stato();
 
     void address(const uint8_t A, const uint8_t PL){
       Set_Address_A(A);

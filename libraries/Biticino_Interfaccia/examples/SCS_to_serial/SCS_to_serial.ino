@@ -1,10 +1,10 @@
-#include <Arduino.h>
-#include "SoftwareSerial.h"
+  #include <Arduino.h>
+#include "espSoftwareSerial.h"
 
 
 #define LEN_TRAMA_SCS_BUS 7
 
-SoftwareSerial biticino = SoftwareSerial(10,11);
+EspSoftwareSerial biticino = EspSoftwareSerial(D6,D7);
 
 
 
@@ -26,10 +26,6 @@ void loop() {
   while(biticino.available()>0){
     val = biticino.read();
 
-    Serial.print(STATE_MACHINE_Read_TRAMA,DEC);         
-    Serial.print(" ");         
-    Serial.println(val,HEX);         
-    
     switch(STATE_MACHINE_Read_TRAMA){
       case 0: 
         //FIND A8
@@ -38,8 +34,8 @@ void loop() {
           STATE_MACHINE_Read_TRAMA = 1;
 
         }else{
-            Serial.print(val,HEX);         
-            Serial.print(" ");         
+            //Serial.print(val,HEX);         
+            //Serial.print(" ");         
         }
       break;
 
@@ -90,7 +86,7 @@ void loop() {
             
             }else{
                 // ERRORE CHECKSUM
-                Serial.println(" ");                    
+                Serial.print("Errore Frame :");                    
                 Serial.print(BYTE_TRAMA[0], HEX);         
                 Serial.print(" ");         
                 Serial.print(BYTE_TRAMA[1], HEX);         
@@ -103,10 +99,10 @@ void loop() {
                 Serial.print(" <<[");          
                 Serial.print(BYTE_TRAMA[5], HEX);         
                 Serial.print("]>> ");                     
-                Serial.print(BYTE_TRAMA[6], HEX);         
-                Serial.println(" ");         
+                Serial.println(BYTE_TRAMA[6], HEX);         
            }          
         }else{
+          Serial.print("Frame Non riconosciuto: ");                    
           Serial.print(BYTE_TRAMA[0], HEX);         
           Serial.print(" ");         
           Serial.print(BYTE_TRAMA[1], HEX);         
@@ -119,8 +115,7 @@ void loop() {
           Serial.print(" ");         
           Serial.print(BYTE_TRAMA[5], HEX);         
           Serial.print(" ");         
-          Serial.print(BYTE_TRAMA[6], HEX);         
-          Serial.print(" ");         
+          Serial.println(BYTE_TRAMA[6], HEX);         
          }
         STATE_MACHINE_Read_TRAMA = 0;        
       }
@@ -138,11 +133,17 @@ void loop() {
         if(val == 0xA3){
           //Verifica se corretto
           //check sum da rivedere
-          if(BYTE_TRAMA[6]==0xA3){
-            //Corretto !!!
-              //CORRETTO
-//              Serial.println();          
-              Serial.println("-----OK-----");          
+            res = BYTE_TRAMA[1] ^ BYTE_TRAMA[2];
+            res = res ^ BYTE_TRAMA[3];
+            res = res ^ BYTE_TRAMA[4];
+            res = res ^ BYTE_TRAMA[5];
+            res = res ^ BYTE_TRAMA[6];
+            res = res ^ BYTE_TRAMA[7];
+            res = res ^ BYTE_TRAMA[8];
+ 
+           if(res == BYTE_TRAMA[9]){    //?????????????????
+              //Corretto !!!
+              Serial.println("-----FRAME ESTESO-----");          
               Serial.print(BYTE_TRAMA[0], HEX);         
               Serial.print(" ");         
               Serial.print(BYTE_TRAMA[1], HEX);         
@@ -165,11 +166,9 @@ void loop() {
               Serial.print(" ");         
               Serial.println(BYTE_TRAMA[10], HEX);         
               Serial.println("-----");          
-              Serial.println("");
           }else{
-              // ERRORE CHECKSUM
-              Serial.println();          
-              Serial.println("-----");          
+              //Errore checksum
+              Serial.println("-----Errore FRAME ESTESO-----");          
               Serial.print(BYTE_TRAMA[0], HEX);         
               Serial.print(" ");         
               Serial.print(BYTE_TRAMA[1], HEX);         
@@ -191,10 +190,10 @@ void loop() {
               Serial.print(BYTE_TRAMA[9], HEX);         
               Serial.print(" ");         
               Serial.println(BYTE_TRAMA[10], HEX);         
-              Serial.println("-----");          
-              Serial.println("");
-          }
+              Serial.println("-----");     
+           }
         }else{
+          Serial.print("Frame Non riconosciuto: ");                             
           Serial.print(BYTE_TRAMA[0], HEX);         
           Serial.print(" ");         
           Serial.print(BYTE_TRAMA[1], HEX);         
@@ -215,8 +214,7 @@ void loop() {
           Serial.print(" ");         
           Serial.print(BYTE_TRAMA[9], HEX);         
           Serial.print(" ");         
-          Serial.print(val, HEX);         
-          Serial.print(" ");         
+          Serial.println(val, HEX);         
          }
         STATE_MACHINE_Read_TRAMA = 0;
       break;
