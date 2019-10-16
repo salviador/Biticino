@@ -69,16 +69,26 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
             if(percentuale > 0){              
               ALZA(deviceId, percentuale);  
-            }
-
-            if(percentuale < 0){              
+            } else if(percentuale < 0){              
               ABBASSA(deviceId, percentuale);  
             }
 
            // if value: 1 == UP
            // if value: -1 == Down
-        }
-        else if (action == "test") {
+        } else if (action == "SetPercentage") {
+
+           String value = jsonBuffer["value"]["percentage"];
+           Serial.println("[WSc] value: " + value); 
+
+           int percentuale = value.toInt();
+
+            if (percentuale > 50) {
+              ALZA(deviceId, percentuale);  
+            } else if (percentuale < 50) {
+              ABBASSA(deviceId, percentuale);  
+            }
+          
+        } else if (action == "test") {
             Serial.println("[WSc] received test command from sinric.com");
         }
       }
