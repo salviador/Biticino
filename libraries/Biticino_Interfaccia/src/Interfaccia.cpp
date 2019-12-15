@@ -259,6 +259,9 @@ int8_t Interfaccia::interfaccia_send_COMANDO(uint8_t A, uint8_t PL,  uint8_t sta
             }
           }
         }
+	#if defined(ESP8266)
+		yield();
+	#endif					
       }
       delay(1);
     }else{
