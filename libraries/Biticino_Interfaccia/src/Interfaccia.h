@@ -16,7 +16,11 @@
 enum TYPE_INTERfACCIA {
   SWITCH,
   SERRANDA,
-  GRUPPO
+  GRUPPO,
+  TEMPERATURE_SENSOR,
+  THERMOSTAT,
+  SERRATURA,
+  CAMPANELLO
 };
 typedef enum TYPE_INTERfACCIA TYPE_INTERfACCIA_t ;
 
@@ -76,7 +80,8 @@ class abstractinterface
         _CHANGEstatoInterfaccia = false;  //Reset
     }
     
-    
+    uint8_t buffer[7];
+
   private:
     TYPE_INTERfACCIA_t _type;
 
@@ -85,6 +90,8 @@ class abstractinterface
 
     uint8_t _statoInterfaccia;
     bool _CHANGEstatoInterfaccia;
+
+    
 
 };
 
@@ -104,7 +111,8 @@ class Interfaccia
     void Loop_Seriale();
     
     int8_t interfaccia_send_COMANDO(uint8_t A, uint8_t PL,  uint8_t stato, uint8_t attendi_risposta);
-   
+    void interfaccia_send_COMANDO_7_RAW(uint8_t* buffertx);
+    void interfaccia_send_COMANDO_11_RAW(uint8_t* buffertx);
     
     void Add_Obj_Interface(abstractinterface *i){
       _interfacee[_ctn_interfacee]=i;    
@@ -191,6 +199,17 @@ class Serranda : public abstractinterface
     void Toggle();
     void Stop();
 
+    void set_Timer(unsigned long timer_salita, unsigned long timer_discesa);
+    void Alza(int value_percent);
+    void Abbassa(int value_percent);
+
+    void Reset_timer_flag(void);
+    void action(int value_percent);
+
+    void timer();
+
+
+
     void address(const uint8_t A, const uint8_t PL){
       Set_Address_A(A);
       Set_Address_PL(PL);
@@ -209,6 +228,13 @@ class Serranda : public abstractinterface
   private:
     Interfaccia* _interfaccia;
 
+    unsigned long TIMER_;
+    int timer_flag = 0;
+    int calcolo_stop_;
+    unsigned long timer_salita_=4000; 
+    unsigned long timer_discesa_=4000;
+
+    int stato_percentuale=0;
 };
 
 class GruppoSwitch : public abstractinterface
@@ -243,7 +269,165 @@ class GruppoSwitch : public abstractinterface
 
 
 
+class Serratura : public abstractinterface
+{
+  public:
+  
+    Serratura(Interfaccia* i);
 
+    //COMANDI  
+    void Sblocca();
+
+    void address(const uint8_t A, const uint8_t PL){
+      Set_Address_A(A);
+    }
+    void address(const uint8_t A_PL){
+      Set_Address_A(A_PL);
+    }
+
+  private:
+    Interfaccia* _interfaccia; 
+};
+
+
+
+class Campanello : public abstractinterface
+{
+  public:
+  
+    Campanello(Interfaccia* i);
+
+    //COMANDI  
+    uint8_t is_pressed();
+
+    void address(const uint8_t A, const uint8_t PL){
+      uint8_t add = (A * 10) + PL;
+      Set_Address_A(add);
+    }
+    void address(const uint8_t A_PL){
+      Set_Address_A(A_PL);
+    }
+
+  private:
+    Interfaccia* _interfaccia; 
+
+    unsigned long TIMERCAMPANELLO = 0;
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class TemperatureSensor : public abstractinterface
+{
+  public:
+
+    TemperatureSensor(Interfaccia* i);
+
+    //COMANDI  
+    bool available();
+    float Get();
+    void Request();
+
+
+    void address(const uint8_t A, const uint8_t PL){
+      uint8_t add = (A * 10) + PL;
+      Set_Address_A(add);
+    }
+    void address(const uint8_t A_PL){
+      Set_Address_A(A_PL);
+
+    }
+
+  private:
+    Interfaccia* _interfaccia;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Thermostat : public abstractinterface
+{
+  public:
+
+    Thermostat(Interfaccia* i);
+
+    //COMANDI  
+    bool change();
+    float Get();
+    void Request_Stato();
+    void Request_Temp_Setting();
+
+    uint8_t loop();
+
+    //invia comandi
+    void set_temperature(float t);
+    void set_mode(uint8_t m);
+
+
+
+    void address(const uint8_t A, const uint8_t PL){
+      uint8_t add = (A * 10) + PL;
+      Set_Address_A(add);
+      temperatureSensor->address(add);
+      temperatureSensor->Request();
+    }
+    void address(const uint8_t A_PL){
+      Set_Address_A(A_PL);
+      temperatureSensor->address(A_PL);
+      temperatureSensor->Request();
+    }
+
+  uint8_t _avaiable=0;
+  float temperature;
+  float temperature_di_Setting;
+
+  private:
+    Interfaccia* _interfaccia;
+    TemperatureSensor* temperatureSensor;
+
+
+
+};
 
 
 

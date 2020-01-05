@@ -51,7 +51,8 @@ int8_t Interfaccia::search_TRAMA(uint8_t START, uint8_t FINISH){
 			case 6:
         BYTE_TRAMA[STATE_MACHINE_Read_TRAMA] = val;
 
-        if((BYTE_TRAMA[3]==0xFF)&&(BYTE_TRAMA[4]==0x0F)){
+          if(BYTE_TRAMA[STATE_MACHINE_Read_TRAMA]!=FINISH){
+        //if((BYTE_TRAMA[3]==0xFF)&&(BYTE_TRAMA[4]==0x0F)){
           //TRAMA ESTESA
           STATE_MACHINE_Read_TRAMA = 7;
           break;
@@ -164,9 +165,87 @@ void Interfaccia::Loop_Seriale(){
           }	
         }
       }
+		}else if(BYTE_TRAMA[1] == 0xB4){	//sensori Temperature
 
-		}
+      for(int i=0; i<_ctn_interfacee; i++){
+        TYPE_INTERfACCIA_t t = _interfacee[i]->Get_Type();
+        //Leggi contenuto della seriale e aggiorna stato dispositivi interfaccie
+        if(t==TEMPERATURE_SENSOR){
+          //Vedi se la risposta della seriale � compatibile con questo indirizzo
+         
+          addA = _interfacee[i]->Get_Address_A();
+
+          if(addA == BYTE_TRAMA[2]){	//Address corisponde
+
+             _interfacee[i]->Set_Stato(1);
+            _interfacee[i]->buffer[0]=BYTE_TRAMA[4];              //_interfacee[i]->Set_Temp_RAW(BYTE_TRAMA[4]);
+			// Serial.println(" _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);");
+          }	
+        }       
+      }
+    }else if((BYTE_TRAMA[1] == 0x91)&& (BYTE_TRAMA[3] == 0x60)&&(BYTE_TRAMA[4] == 0x08)){	//Campanello
+      for(int i=0; i<_ctn_interfacee; i++){
+        TYPE_INTERfACCIA_t t = _interfacee[i]->Get_Type();
+        //Leggi contenuto della seriale e aggiorna stato dispositivi interfaccie
+        if(t==CAMPANELLO){
+          //Vedi se la risposta della seriale � compatibile con questo indirizzo
+         
+          addA = _interfacee[i]->Get_Address_A();
+
+          if(addA == BYTE_TRAMA[2]){	//Address corisponde
+
+             _interfacee[i]->Set_Stato(1);
+			// Serial.println(" _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);");
+          }	
+        }       
+      }
+     }else if((BYTE_TRAMA[2] == 0x00)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x08)){	//Serranda x sincronismo ALZA
+      for(int i=0; i<_ctn_interfacee; i++){
+        if(_interfacee[i]->Get_Address()==BYTE_TRAMA[1]){
+          _interfacee[i]->buffer[0] = 2;
+        }       
+      }
+     }else if((BYTE_TRAMA[2] == 0x00)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x09)){	//Serranda x sincronismo ABBASSA
+      for(int i=0; i<_ctn_interfacee; i++){
+        if(_interfacee[i]->Get_Address()==BYTE_TRAMA[1]){
+          _interfacee[i]->buffer[0] = 1;       
+        }       
+      }
+     }else if((BYTE_TRAMA[2] == 0x00)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x0A)){	//Serranda x sincronismo FERMA
+      for(int i=0; i<_ctn_interfacee; i++){
+        if(_interfacee[i]->Get_Address()==BYTE_TRAMA[1]){
+          _interfacee[i]->buffer[0] = 3;
+        }
+      }
+     }
+
+
+
 	}else if(val == 2){
+    /*
+      Serial.print(BYTE_TRAMA[0],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[1],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[2],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[3],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[4],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[5],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[6],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[7],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[8],HEX);
+      Serial.print(" ");
+      Serial.print(BYTE_TRAMA[9],HEX);
+      Serial.print(" ");
+      Serial.println(BYTE_TRAMA[10],HEX);
+    */
+
     //Trama ESTESA
 		if(BYTE_TRAMA[1] == 0xEC){	//Richiesta Comando
 	
@@ -193,7 +272,78 @@ void Interfaccia::Loop_Seriale(){
         }
       }
 
-		}
+    }else if((BYTE_TRAMA[1] == 0xD2) && (BYTE_TRAMA[3] == 0x03) && (BYTE_TRAMA[4] == 0x04)&&
+      (BYTE_TRAMA[5] == 0xC0)){
+      //TERMOSTATO <<temperatura >>
+      for(int i=0; i<_ctn_interfacee; i++){
+        TYPE_INTERfACCIA_t t = _interfacee[i]->Get_Type();
+        //Leggi contenuto della seriale e aggiorna stato dispositivi interfaccie
+        if(t==THERMOSTAT){
+          //Vedi se la risposta della seriale � compatibile con questo indirizzo
+         
+          addA = _interfacee[i]->Get_Address_A();
+
+          if(addA == BYTE_TRAMA[2]){	//Address corisponde
+            if(BYTE_TRAMA[7]!=0x00){
+              _interfacee[i]->Set_Stato(1);
+              _interfacee[i]->buffer[0]=BYTE_TRAMA[7];           
+            }
+          }	
+        }       
+      }
+    }else if((BYTE_TRAMA[1] == 0xD2) && (BYTE_TRAMA[3] == 0x03) && (BYTE_TRAMA[4] == 0x04)&&
+      (BYTE_TRAMA[5] == 0x12)){
+      //TERMOSTATO <<temperature di Setting>> e <<Modalita freddo o caldo>>
+      for(int i=0; i<_ctn_interfacee; i++){
+        TYPE_INTERfACCIA_t t = _interfacee[i]->Get_Type();
+        //Leggi contenuto della seriale e aggiorna stato dispositivi interfaccie
+        if(t==THERMOSTAT){
+          //Vedi se la risposta della seriale � compatibile con questo indirizzo
+         
+          addA = _interfacee[i]->Get_Address_A();
+
+          if(addA == BYTE_TRAMA[2]){	//Address corisponde
+
+            _interfacee[i]->Set_Stato(2);
+            _interfacee[i]->buffer[1]=BYTE_TRAMA[6];           
+
+            _interfacee[i]->buffer[3]=BYTE_TRAMA[7];            //Qui temp
+            _interfacee[i]->buffer[4]=BYTE_TRAMA[8];           
+
+          }	
+        }       
+      }
+    }else if((BYTE_TRAMA[1] == 0xD2) && (BYTE_TRAMA[3] == 0x03) && (BYTE_TRAMA[4] == 0x04)&&
+      (BYTE_TRAMA[5] == 0x0E)){
+      //TERMOSTATO <<temperature di Setting>>
+      for(int i=0; i<_ctn_interfacee; i++){
+        TYPE_INTERfACCIA_t t = _interfacee[i]->Get_Type();
+        //Leggi contenuto della seriale e aggiorna stato dispositivi interfaccie
+        if(t==THERMOSTAT){
+          //Vedi se la risposta della seriale � compatibile con questo indirizzo
+         
+          addA = _interfacee[i]->Get_Address_A();
+
+          if(addA == BYTE_TRAMA[2]){	//Address corisponde
+
+            _interfacee[i]->Set_Stato(3);
+            _interfacee[i]->buffer[2]=BYTE_TRAMA[7];           
+          }	
+        }       
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
   }
   
@@ -258,12 +408,13 @@ int8_t Interfaccia::interfaccia_send_COMANDO(uint8_t A, uint8_t PL,  uint8_t sta
               return stato;
             }
           }
-        }
+        }	
 	#if defined(ESP8266)
 		yield();
-	#endif					
+	#endif			
       }
-      delay(1);
+	  
+      delay(1);	 
     }else{
       if(i==2){
         if(stato==1){
@@ -279,7 +430,44 @@ int8_t Interfaccia::interfaccia_send_COMANDO(uint8_t A, uint8_t PL,  uint8_t sta
 }
 
 
+void Interfaccia::interfaccia_send_COMANDO_7_RAW(uint8_t* buffertx){
+	uint8_t checkbytes=0;
+	uint8_t i=0;
 
+  checkbytes=0;
+  checkbytes = buffertx[1];
+  checkbytes = checkbytes ^ buffertx[2];
+  checkbytes = checkbytes ^ buffertx[3];
+  checkbytes = checkbytes ^ buffertx[4];
+  buffertx[5] = checkbytes;
+
+	for(i=0;i<3;i++){
+		//Send Comando	
+    scs->write(buffertx,7);
+  }
+}
+
+void Interfaccia::interfaccia_send_COMANDO_11_RAW(uint8_t* buffertx){
+	uint8_t checkbytes=0;
+	uint8_t i=0;
+
+  checkbytes=0;
+  checkbytes = buffertx[1];
+  checkbytes = checkbytes ^ buffertx[2];
+  checkbytes = checkbytes ^ buffertx[3];
+  checkbytes = checkbytes ^ buffertx[4];
+  checkbytes = checkbytes ^ buffertx[5];
+  checkbytes = checkbytes ^ buffertx[6];
+  checkbytes = checkbytes ^ buffertx[7];
+  checkbytes = checkbytes ^ buffertx[8];
+
+  buffertx[9] = checkbytes;
+
+	for(i=0;i<3;i++){
+		//Send Comando	
+    scs->write(buffertx,11);
+  }
+}
 
 
 
@@ -308,6 +496,7 @@ Switch::Switch(Interfaccia* i){
 }
 void Switch::On(void){
   uint8_t stato_rele=0;
+    Serial.println("Accendo");
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0, 1);
   Set_Stato(stato_rele);
@@ -315,6 +504,8 @@ void Switch::On(void){
 }
 void Switch::Off(void){
   uint8_t stato_rele=1;
+
+    Serial.println("Spegno");    
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 1, 1);
   Set_Stato(stato_rele);
@@ -353,6 +544,11 @@ Serranda::Serranda(Interfaccia* i){
   _interfaccia->Add_Obj_Interface(this);
   Set_Stato(0);
   Reset_Change_Stato();
+
+  timer_flag = 0;
+  stato_percentuale = 0;
+  buffer[0] = 0;
+  buffer[1] = 0;
 }
 void Serranda::Alza(void){
   uint8_t stato_rele=0;
@@ -364,22 +560,34 @@ void Serranda::Alza(void){
   }
   Set_Stato(stato_rele);
   Reset_Change_Stato();
+  if(timer_flag==0){
+    stato_percentuale = 100;    //100%
+    buffer[0] = 0;
+    Serial.println("finestra Alzo Reset Reset percetuale");
+  }
 }
 void Serranda::Abbassa(void){
   uint8_t stato_rele=0;
-
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x0A, 1);
+
   if(stato_rele == 0x0A){
     delay(500);
     stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x09, 1);
   }
   Set_Stato(stato_rele);
   Reset_Change_Stato();
+  if(timer_flag==0){
+    stato_percentuale = 0;    //0%
+    buffer[0] = 0;
+    Serial.println("finestra Abbasso Reset percetuale");
+  }
 }
 void Serranda::Stop(void){
   uint8_t stato_rele=0;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x0A, 1);
+  buffer[0] = 0;
+  buffer[1] = 0;
 }
 
 
@@ -399,6 +607,126 @@ void Serranda::Toggle(void){
   } 
 }
 
+
+void Serranda::set_Timer(unsigned long timer_salita, unsigned long timer_discesa){
+  timer_salita_ = timer_salita;
+  timer_discesa_ = timer_discesa;
+}
+
+void Serranda::Alza(int value_percent){
+  if(value_percent == 100){
+    timer_flag=0;
+    Alza();
+  }else{
+    timer_flag = 1;
+    value_percent = abs(value_percent);
+
+    calcolo_stop_ = (timer_salita_ / 100) * value_percent;
+
+    Serial.print("Serranda::Alza: ");
+    Serial.println(calcolo_stop_);
+
+    Alza();
+    TIMER_ = millis();
+    buffer[0] = 0;
+    buffer[1] = 0;
+  }
+}
+void Serranda::Abbassa(int value_percent){
+  if(value_percent == 0){
+    timer_flag=0;
+    Abbassa();
+  }else{  
+    timer_flag = -1;
+    int value_percentp = abs(value_percent);
+
+    calcolo_stop_ = (timer_discesa_ / 100) * value_percentp;
+
+    Serial.print("Serranda::Abbassa: ");
+    Serial.println(calcolo_stop_);
+
+    Abbassa();
+    TIMER_ = millis();
+    buffer[0] = 0;
+    buffer[1] = 0;
+  }
+}
+
+void Serranda::Reset_timer_flag(void){
+  timer_flag=0;
+}
+
+void Serranda::action(int value_percent){
+   //stato_percentuale //stato attuale
+  int action = value_percent - stato_percentuale;
+
+  Serial.print("Serranda action: ");
+  Serial.println(action);
+
+  if(action < 0){
+    Abbassa(action);
+  }else if(action > 0){
+    Alza(action);
+  }
+  stato_percentuale = value_percent;
+  
+  Serial.print("Serranda stato [percentuale]: ");
+  Serial.println(stato_percentuale);
+
+}
+
+void Serranda::timer(void){
+  if(timer_flag==1){
+    //Salita
+    if((millis()-TIMER_)>=calcolo_stop_){
+
+      Serial.println("Serranda::STOP");
+
+      Stop();
+      timer_flag = 0;
+    }
+  }else if(timer_flag == -1){
+    //Discesa
+    if((millis()-TIMER_)>=calcolo_stop_){
+
+      Serial.println("Serranda::STOP");
+
+      Stop();
+      timer_flag = 0;
+    }
+  }
+
+  if(buffer[0] == 2){
+    //Arrivato comando manuale ALZA
+    TIMER_ = millis();
+    buffer[0] = 0;
+    buffer[1] = 2;
+  }else if(buffer[0] == 1){
+    //Arrivato comando manuale ABBASSA
+    TIMER_ = millis();
+    buffer[0] = 0;
+    buffer[1] = 1;
+  }else if(buffer[0] == 3){
+    //Arrivato comando manuale FERMA
+    unsigned long _times = millis() - TIMER_;
+    if(buffer[1] == 2){
+        //precedente comando alza?
+      //stima la percentuale
+      float _stato_percentualet = (_times / timer_salita_) * 100.0;
+      stato_percentuale = stato_percentuale + (int)_stato_percentualet;
+      if(stato_percentuale > 100) stato_percentuale = 100;
+    }else if(buffer[1] == 1){
+        //precedente comando abbassa?
+      //stima la percentuale
+      float _stato_percentualet = (_times / timer_discesa_) * 100.0;
+      stato_percentuale = stato_percentuale - (int)_stato_percentualet;
+      if(stato_percentuale < 0) stato_percentuale = 0;
+    }
+    buffer[0] = 0;
+    buffer[1] = 0;
+  }
+
+}
 
 
 
@@ -442,3 +770,335 @@ void GruppoSwitch::Toggle(void){
   Reset_Change_Stato();
 }
 
+
+
+    
+//Serratura, Attuatore!    
+//Serratura, Attuatore!    
+//Serratura, Attuatore!    
+//Serratura, Attuatore!    
+    
+Serratura::Serratura(Interfaccia* i){
+  Set_Type(SERRATURA);
+  _interfaccia = i;
+
+  _interfaccia->Add_Obj_Interface(this);
+  Set_Stato(0);
+  Reset_Change_Stato();
+}
+void Serratura::Sblocca(void){
+  //Invia comando x requet temp
+    uint8_t bufferTxscs[7];
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0x96;
+    bufferTxscs[2] = 0xA0 | Get_Address_A();
+    bufferTxscs[3] = 0x6F;
+    bufferTxscs[4] = 0xA4;
+    bufferTxscs[5] = 0;   // lo calcola interfaccia_send_COMANDO_7_RAW
+    bufferTxscs[6] = 0xA3;
+  _interfaccia->interfaccia_send_COMANDO_7_RAW(bufferTxscs);
+
+  Reset_Change_Stato();
+}
+
+
+//Campanello, Attuatore!    
+//Campanello, Attuatore!    
+//Campanello, Attuatore!    
+//Campanello, Attuatore!    
+    
+Campanello::Campanello(Interfaccia* i){
+  Set_Type(CAMPANELLO);
+  _interfaccia = i;
+
+  _interfaccia->Add_Obj_Interface(this);
+  Set_Stato(0);
+  Reset_Change_Stato();
+
+  TIMERCAMPANELLO = millis();
+}
+
+uint8_t  Campanello::is_pressed(void){
+  if(Get_Stato() == 1){
+    if((millis()-TIMERCAMPANELLO) > 1500){
+      TIMERCAMPANELLO = millis();
+
+      Set_Stato(0);
+      return 1;
+    }else{
+      Set_Stato(0);
+      return 0;
+    }
+    //Set_Stato(0);
+    //return 1;
+  }
+  return 0;
+}
+
+
+
+
+//Temperature Sensori!
+//Temperature Sensori!
+//Temperature Sensori!
+//Temperature Sensori!
+//Temperature Sensori!
+
+TemperatureSensor::TemperatureSensor(Interfaccia* i){
+  Set_Type(TEMPERATURE_SENSOR);
+  _interfaccia = i;
+
+  _interfaccia->Add_Obj_Interface(this);
+  Set_Stato(0);
+  Reset_Change_Stato();
+}
+bool TemperatureSensor::available(void){
+  if(Get_Stato() == 1){
+    Set_Stato(0);
+    Reset_Change_Stato();
+    return true;
+  }
+  return false;
+}
+float TemperatureSensor::Get(void){
+  float temp=0.000;
+
+  temp = buffer[0];
+  temp = temp / 10;
+  return temp;
+}
+void TemperatureSensor::Request(void){
+  //Invia comando x requet temp
+    uint8_t bufferTxscs[7];
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0x99;
+    bufferTxscs[2] = Get_Address_A();
+    bufferTxscs[3] = 0x30;
+    bufferTxscs[4] = 0x00;
+    bufferTxscs[5] = 0;   // lo calcola interfaccia_send_COMANDO_7_RAW
+    bufferTxscs[6] = 0xA3;
+  _interfaccia->interfaccia_send_COMANDO_7_RAW(bufferTxscs);
+}
+
+
+
+
+//Thermostat Sensori!
+//Thermostat Sensori!
+//Thermostat Sensori!
+//Thermostat Sensori!
+//Thermostat Sensori!
+
+Thermostat::Thermostat(Interfaccia* i){
+  Set_Type(THERMOSTAT);
+  _interfaccia = i;
+
+  _interfaccia->Add_Obj_Interface(this);
+  Set_Stato(0);
+  Reset_Change_Stato();
+ 
+  temperatureSensor = new TemperatureSensor(i);
+}
+bool Thermostat::change(void){
+  if(Get_Stato() == 1){
+    Set_Stato(0);
+    Reset_Change_Stato();
+    return true;
+  }
+  return false;
+}
+float Thermostat::Get(void){
+  float temp=0.000;
+
+  temp = buffer[0];
+  temp = temp / 10;
+  return temp;
+}
+void Thermostat::Request_Stato(void){
+  //Invia comando x requet STATO
+    uint8_t bufferTxscs[7];
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0x99;
+    bufferTxscs[2] = Get_Address_A();
+    bufferTxscs[3] = 0x30;
+    bufferTxscs[4] = 0x11;
+    bufferTxscs[5] = 0;   // lo calcola interfaccia_send_COMANDO_7_RAW
+    bufferTxscs[6] = 0xA3;
+  _interfaccia->interfaccia_send_COMANDO_7_RAW(bufferTxscs);
+}
+void Thermostat::Request_Temp_Setting(void){
+  //Invia comando x requet Temperatura di Setting
+    uint8_t bufferTxscs[7];
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0x99;
+    bufferTxscs[2] = Get_Address_A();
+    bufferTxscs[3] = 0x30;
+    bufferTxscs[4] = 0x0E;
+    bufferTxscs[5] = 0;   // lo calcola interfaccia_send_COMANDO_7_RAW
+    bufferTxscs[6] = 0xA3;
+  _interfaccia->interfaccia_send_COMANDO_7_RAW(bufferTxscs);
+}
+
+uint8_t Thermostat::loop(void){
+  if(temperatureSensor->available()){
+    temperature = temperatureSensor->Get(); 
+
+    Serial.print("[Termostato] sensore temperatura: ");
+    Serial.println(temperature);
+
+    _avaiable = 1;
+    return 1;
+  }
+  if(Get_Stato() == 1 ){
+    Set_Stato(0);
+    //Temeratura di setting cambiata
+    temperature_di_Setting = ((buffer[0] - 6) * 0.50) + 3;
+
+    Serial.print("[Termostato] setting temperatura 1: ");
+    Serial.println(temperature_di_Setting);
+
+    _avaiable = 2;
+    return 2;
+  }
+  if(Get_Stato() == 2 ){
+    Set_Stato(0);
+
+    uint16_t v = 0;
+    v = buffer[3] << 8;
+    v = v | buffer[4];
+    temperature_di_Setting = (v / 10.0);
+
+    Serial.print("[Termostato] setting temperatura 3: ");
+    Serial.println(temperature_di_Setting);
+
+
+    //Modalita cambiata
+    if(((buffer[1] & 0x0F) == 0x02) | ((buffer[1] & 0x0F) == 0x00)){
+      //Inverno
+
+      Serial.print("[Termostato] modalita: ");
+      Serial.println("Inverno");
+
+      _avaiable = 4;
+      return 4;
+
+    }
+    if(((buffer[1] & 0x0F) == 0x03) | ((buffer[1] & 0x0F) == 0x01)){
+      //Estate
+
+      Serial.print("[Termostato] modalita: ");
+      Serial.println("Estate");
+
+      _avaiable = 3;
+      return 3;
+    }
+    if(buffer[1] == 0xFF){
+      //OFF
+
+      Serial.print("[Termostato] modalita: ");
+      Serial.println("OFF");
+
+      _avaiable = 5;
+      return 5;
+    }
+
+  }
+  if(Get_Stato() == 3 ){
+    Set_Stato(0);
+    //Temeratura di setting cambiata
+    temperature_di_Setting = (buffer[2] / 10.0);
+
+    Serial.print("[Termostato] setting temperatura 2: ");
+    Serial.println(temperature_di_Setting);
+
+    _avaiable = 2;
+    return 2;
+  }
+
+
+  return 0;
+}
+
+
+void Thermostat::set_temperature(float t){
+    uint8_t val = (((t - 3) / 0.5) + 6);
+    /*
+    Serial.print("Temperatura impostata: ");
+    Serial.print(t);
+    Serial.print("  ;  ");
+    Serial.println(val,HEX);
+    */
+
+    uint8_t bufferTxscs[11];
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0xD1;
+    bufferTxscs[2] = Get_Address_A();
+    bufferTxscs[3] = 0x03;
+    bufferTxscs[4] = 0x02;
+    bufferTxscs[5] = 0xC1;
+    bufferTxscs[6] = 0x02;
+    bufferTxscs[7] = val;    //Temp
+    bufferTxscs[8] = 0x00;
+    bufferTxscs[9] = 0x00;   // lo calcola interfaccia_send_COMANDO_11_RAW
+    bufferTxscs[10] = 0xA3;
+
+  _interfaccia->interfaccia_send_COMANDO_11_RAW(bufferTxscs);
+}
+
+void Thermostat::set_mode(uint8_t m){
+    uint8_t bufferTxscs[11];
+
+  if(m==0){
+    //OFF
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0xD1;
+    bufferTxscs[2] = Get_Address_A();
+    bufferTxscs[3] = 0x03;
+    bufferTxscs[4] = 0x02;
+    bufferTxscs[5] = 0xC1;
+    bufferTxscs[6] = 0x06;
+    bufferTxscs[7] = 0x00;    
+    bufferTxscs[8] = 0x00;
+    bufferTxscs[9] = 0x00;   // lo calcola interfaccia_send_COMANDO_11_RAW
+    bufferTxscs[10] = 0xA3;
+  _interfaccia->interfaccia_send_COMANDO_11_RAW(bufferTxscs);  
+  }else if (m==1)
+  {
+    //freddo
+
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0xD1;
+    bufferTxscs[2] = Get_Address_A();
+    bufferTxscs[3] = 0x03;
+    bufferTxscs[4] = 0x02;
+    bufferTxscs[5] = 0xC1;
+    bufferTxscs[6] = 0xF1;
+    bufferTxscs[7] = 0x00;    
+    bufferTxscs[8] = 0x00;
+    bufferTxscs[9] = 0x00;   // lo calcola interfaccia_send_COMANDO_11_RAW
+    bufferTxscs[10] = 0xA3;
+  _interfaccia->interfaccia_send_COMANDO_11_RAW(bufferTxscs);  
+  }else if (m==2)
+  {
+    //caldo
+    bufferTxscs[0] = 0xA8;
+    bufferTxscs[1] = 0xD1;
+    bufferTxscs[2] = Get_Address_A();
+    bufferTxscs[3] = 0x03;
+    bufferTxscs[4] = 0x02;
+    bufferTxscs[5] = 0xC1;
+    bufferTxscs[6] = 0xF0;
+    bufferTxscs[7] = 0x00;    
+    bufferTxscs[8] = 0x00;
+    bufferTxscs[9] = 0x00;   // lo calcola interfaccia_send_COMANDO_11_RAW
+    bufferTxscs[10] = 0xA3;
+  _interfaccia->interfaccia_send_COMANDO_11_RAW(bufferTxscs);  
+  }else if (m==3)
+  {
+  }
+  
+  
+  
+
+
+}
