@@ -103,17 +103,19 @@ void SPEGNI(String deviceId) {
 //Alexa -> Gestione Comando SERRANDA
                                                             //Funzione SERRANDA, i dispositivi richiesti da Alexa
 void ALEXA_SERRANDA(String deviceID, int valore){
-  if(deviceID == SERRANDA_STUDIO)
+  if(deviceID == ID_SERRANDA_SALA)
   {  
     if(valore == 100){
       Serial.println("Serranda Alzo Tutto!");        
-      serranda_Studio.Alza(100);
+      serranda_Sala.Alza(100);
     }else if(valore == 0){
       Serial.println("Serranda Abbasso Tutto!");            
-      serranda_Studio.Abbassa(0);
+      serranda_Sala.Abbassa(0);
     }else if((valore > 0)&(valore < 100)){
       Serial.println("Serranda action.....");                 
-      serranda_Studio.action(valore);
+      serranda_Sala.action(valore);
+    }else if(valore < 0){
+      serranda_Sala.action(-valore);
     }    
   }
 }
@@ -273,8 +275,11 @@ void loop() {
 
 
   //x Aggiornare lo STATO delle SERRANDE
-  serranda_Sala.timer();
-
+  if(serranda_Sala.timer()==1)
+  {
+       int vp = serranda_Sala.get_percentuale();    
+      send_state_to_Alexa_synchronous(ID_SERRANDA_SALA, "Alexa.RangeController", String(vp));          //Invia Percentuale Serranda ad Alexa
+  }
 
 
 

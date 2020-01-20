@@ -2,6 +2,11 @@
 
 
 
+union
+{
+    unsigned long val;
+    unsigned char buffer[4];
+}convertByteArryTo32;
 
 
 
@@ -162,7 +167,36 @@ void Interfaccia::Loop_Seriale(){
             if(BYTE_TRAMA[4] != 0x0A){
                 _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);
             }
+
+            if((BYTE_TRAMA[1] == 0xB8)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x08)){	//Serranda x sincronismo ALZA
+              Serial.println("ALZO MANUALE ***");
+                  _interfacee[i]->buffer[0] = 2;
+                  convertByteArryTo32.val = millis();
+                  _interfacee[i]->buffer[1] = convertByteArryTo32.buffer[0];
+                  _interfacee[i]->buffer[2] = convertByteArryTo32.buffer[1];
+                  _interfacee[i]->buffer[3] = convertByteArryTo32.buffer[2];
+                  _interfacee[i]->buffer[4] = convertByteArryTo32.buffer[3];
+
+            }else if((BYTE_TRAMA[1] == 0xB8)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x09)){	//Serranda x sincronismo ABBASSA
+            Serial.println("ABBASSO MANUALE ***");
+                _interfacee[i]->buffer[0] = 1;       
+                  convertByteArryTo32.val = millis();
+                  _interfacee[i]->buffer[1] = convertByteArryTo32.buffer[0];
+                  _interfacee[i]->buffer[2] = convertByteArryTo32.buffer[1];
+                  _interfacee[i]->buffer[3] = convertByteArryTo32.buffer[2];
+                  _interfacee[i]->buffer[4] = convertByteArryTo32.buffer[3];
+            }else if((BYTE_TRAMA[1] == 0xB8)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x0A)){	//Serranda x sincronismo FERMA
+              Serial.println("ABBASSO STOP ***");
+                  _interfacee[i]->buffer[0] = 3;
+                  convertByteArryTo32.val = millis();
+                  _interfacee[i]->buffer[1] = convertByteArryTo32.buffer[0];
+                  _interfacee[i]->buffer[2] = convertByteArryTo32.buffer[1];
+                  _interfacee[i]->buffer[3] = convertByteArryTo32.buffer[2];
+                  _interfacee[i]->buffer[4] = convertByteArryTo32.buffer[3];
+            }
+
           }	
+
         }
       }
 		}else if(BYTE_TRAMA[1] == 0xB4){	//sensori Temperature
@@ -198,24 +232,6 @@ void Interfaccia::Loop_Seriale(){
 			// Serial.println(" _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);");
           }	
         }       
-      }
-     }else if((BYTE_TRAMA[2] == 0x00)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x08)){	//Serranda x sincronismo ALZA
-      for(int i=0; i<_ctn_interfacee; i++){
-        if(_interfacee[i]->Get_Address()==BYTE_TRAMA[1]){
-          _interfacee[i]->buffer[0] = 2;
-        }       
-      }
-     }else if((BYTE_TRAMA[2] == 0x00)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x09)){	//Serranda x sincronismo ABBASSA
-      for(int i=0; i<_ctn_interfacee; i++){
-        if(_interfacee[i]->Get_Address()==BYTE_TRAMA[1]){
-          _interfacee[i]->buffer[0] = 1;       
-        }       
-      }
-     }else if((BYTE_TRAMA[2] == 0x00)&& (BYTE_TRAMA[3] == 0x12)&&(BYTE_TRAMA[4] == 0x0A)){	//Serranda x sincronismo FERMA
-      for(int i=0; i<_ctn_interfacee; i++){
-        if(_interfacee[i]->Get_Address()==BYTE_TRAMA[1]){
-          _interfacee[i]->buffer[0] = 3;
-        }
       }
      }
 
@@ -548,7 +564,9 @@ Serranda::Serranda(Interfaccia* i){
   timer_flag = 0;
   stato_percentuale = 0;
   buffer[0] = 0;
-  buffer[1] = 0;
+  buffer[5] = 0;
+  _STATO = 0;
+  precenttualeChange = 1;
 }
 void Serranda::Alza(void){
   uint8_t stato_rele=0;
@@ -562,7 +580,7 @@ void Serranda::Alza(void){
   Reset_Change_Stato();
   if(timer_flag==0){
     stato_percentuale = 100;    //100%
-    buffer[0] = 0;
+    precenttualeChange = 1;
     Serial.println("finestra Alzo Reset Reset percetuale");
   }
 }
@@ -578,7 +596,7 @@ void Serranda::Abbassa(void){
   Reset_Change_Stato();
   if(timer_flag==0){
     stato_percentuale = 0;    //0%
-    buffer[0] = 0;
+    precenttualeChange = 1;
     Serial.println("finestra Abbasso Reset percetuale");
   }
 }
@@ -586,8 +604,6 @@ void Serranda::Stop(void){
   uint8_t stato_rele=0;
 
   stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0x0A, 1);
-  buffer[0] = 0;
-  buffer[1] = 0;
 }
 
 
@@ -628,8 +644,6 @@ void Serranda::Alza(int value_percent){
 
     Alza();
     TIMER_ = millis();
-    buffer[0] = 0;
-    buffer[1] = 0;
   }
 }
 void Serranda::Abbassa(int value_percent){
@@ -647,8 +661,6 @@ void Serranda::Abbassa(int value_percent){
 
     Abbassa();
     TIMER_ = millis();
-    buffer[0] = 0;
-    buffer[1] = 0;
   }
 }
 
@@ -668,63 +680,175 @@ void Serranda::action(int value_percent){
   }else if(action > 0){
     Alza(action);
   }
-  stato_percentuale = value_percent;
+  //stato_percentuale = value_percent;
   
-  Serial.print("Serranda stato [percentuale]: ");
-  Serial.println(stato_percentuale);
+  //Serial.print("Serranda stato [percentuale]: ");
+  //Serial.println(stato_percentuale);
 
 }
 
-void Serranda::timer(void){
+int Serranda::timer(void){
+
   if(timer_flag==1){
     //Salita
     if((millis()-TIMER_)>=calcolo_stop_){
+      Stop();
+
+      float calcoloperc = (100.0 / (float)timer_salita_) * (float)(millis()-TIMER_);
+      int deltaPercentuale = (int)calcoloperc;
+      stato_percentuale = stato_percentuale + deltaPercentuale;
+      if(stato_percentuale > 100){
+        stato_percentuale = 100;
+      }
 
       Serial.println("Serranda::STOP");
 
-      Stop();
+      Serial.print("Serranda stato [percentuale]: ");
+      Serial.println(stato_percentuale);
+
       timer_flag = 0;
+
+      buffer[5] = 0;
+      buffer[0] = 0;
+      _STATO = 0;
+      precenttualeChange = 1;
     }
   }else if(timer_flag == -1){
     //Discesa
     if((millis()-TIMER_)>=calcolo_stop_){
+      Stop();
+
+      float calcoloperc = (100.0 / (float)timer_discesa_) * (float)(millis()-TIMER_);
+      int deltaPercentuale = (int)calcoloperc;
+      stato_percentuale = stato_percentuale - deltaPercentuale;
+      if(stato_percentuale < 0){
+        stato_percentuale = 0;
+      }
 
       Serial.println("Serranda::STOP");
 
-      Stop();
+      Serial.print("Serranda stato [percentuale]: ");
+      Serial.println(stato_percentuale);
+
       timer_flag = 0;
+
+      buffer[5] = 0;
+      buffer[0] = 0;
+      _STATO = 0;
+      precenttualeChange = 1;
     }
   }
 
-  if(buffer[0] == 2){
-    //Arrivato comando manuale ALZA
-    TIMER_ = millis();
-    buffer[0] = 0;
-    buffer[1] = 2;
-  }else if(buffer[0] == 1){
-    //Arrivato comando manuale ABBASSA
-    TIMER_ = millis();
-    buffer[0] = 0;
-    buffer[1] = 1;
-  }else if(buffer[0] == 3){
-    //Arrivato comando manuale FERMA
-    unsigned long _times = millis() - TIMER_;
-    if(buffer[1] == 2){
-        //precedente comando alza?
-      //stima la percentuale
-      float _stato_percentualet = (_times / timer_salita_) * 100.0;
-      stato_percentuale = stato_percentuale + (int)_stato_percentualet;
-      if(stato_percentuale > 100) stato_percentuale = 100;
-    }else if(buffer[1] == 1){
-        //precedente comando abbassa?
-      //stima la percentuale
-      float _stato_percentualet = (_times / timer_discesa_) * 100.0;
-      stato_percentuale = stato_percentuale - (int)_stato_percentualet;
-      if(stato_percentuale < 0) stato_percentuale = 0;
-    }
-    buffer[0] = 0;
-    buffer[1] = 0;
+
+
+  switch(_STATO){
+    case 0:
+      if(buffer[0] == 2){
+        buffer[5] = 2;
+        buffer[0] = 0;
+        //Comando Alza manuale
+        convertByteArryTo32.buffer[0] = buffer[1];
+        convertByteArryTo32.buffer[1] = buffer[2];
+        convertByteArryTo32.buffer[2] = buffer[3];
+        convertByteArryTo32.buffer[3] = buffer[4];     
+        timeSTART = convertByteArryTo32.val;
+        Serial.print("Time START Comando Alza: ");
+        Serial.println(timeSTART);
+
+        _STATO = 1;
+      }
+
+      if(buffer[0] == 1){
+        buffer[5] = 1;
+        buffer[0] = 0;
+        //Comando Abbassa manuale
+        convertByteArryTo32.buffer[0] = buffer[1];
+        convertByteArryTo32.buffer[1] = buffer[2];
+        convertByteArryTo32.buffer[2] = buffer[3];
+        convertByteArryTo32.buffer[3] = buffer[4];     
+        timeSTART = convertByteArryTo32.val;
+        Serial.print("Time START Comando Abbassa: ");
+        Serial.println(timeSTART);
+
+        _STATO = 1;
+      }
+    break;
+
+    case 1:
+
+      if(buffer[0] == 3){
+        buffer[0] = 0;
+        //Comando STOP manuale
+        convertByteArryTo32.buffer[0] = buffer[1];
+        convertByteArryTo32.buffer[1] = buffer[2];
+        convertByteArryTo32.buffer[2] = buffer[3];
+        convertByteArryTo32.buffer[3] = buffer[4];     
+        unsigned long timeSTOP = convertByteArryTo32.val;
+        unsigned long timeelapsed = timeSTOP - timeSTART;
+
+        int deltaPercentuale;
+        if(buffer[5] == 2){
+          float calcoloperc = (100.0 / (float)timer_salita_) * (float)timeelapsed;
+          deltaPercentuale = (int)calcoloperc;
+          stato_percentuale = stato_percentuale + deltaPercentuale;
+          if(stato_percentuale > 100){
+            stato_percentuale = 100;
+          }
+        }else{
+          float calcoloperc = (100.0 / (float)timer_discesa_) * (float)timeelapsed;
+          deltaPercentuale = (int)calcoloperc;
+          stato_percentuale = stato_percentuale - deltaPercentuale;
+          if(stato_percentuale < 0){
+            stato_percentuale = 0;
+          }
+        }
+
+        Serial.print("Time STOP Comando [T trascorso]: ");
+        Serial.print(timeelapsed);
+        Serial.print("  DELTA percentuale: ");
+        Serial.print(deltaPercentuale);
+        Serial.print("  percentuale: ");
+        Serial.println(stato_percentuale);
+
+
+
+        _STATO = 0;
+        buffer[5] = 0;
+        precenttualeChange = 1;
+      }
+
+      if(buffer[5] == 2){
+          //Comando precedente alza
+        unsigned long timeelapsed = millis() - timeSTART;
+        if(timeelapsed >= timer_salita_){
+            //fine corsa
+          buffer[0] = 0;
+          buffer[0] = 0;
+          _STATO = 0;
+          stato_percentuale = 100;
+          precenttualeChange = 1;
+
+          Serial.println("Time Fine corsa % 100");
+        }
+      }
+      if(buffer[5] == 1){
+          //Comando precedente Abbassa
+        unsigned long timeelapsed = millis() - timeSTART;
+        if(timeelapsed >= timer_discesa_){
+            //fine corsa
+          buffer[0] = 0;
+          buffer[0] = 0;
+          _STATO = 0;
+          stato_percentuale = 0;
+          precenttualeChange = 1;
+          Serial.println("Time Fine corsa % 0");
+        }
+      }
+    break;
   }
+
+
+  return precenttualeChange;  
 
 }
 

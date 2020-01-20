@@ -206,7 +206,7 @@ class Serranda : public abstractinterface
     void Reset_timer_flag(void);
     void action(int value_percent);
 
-    void timer();
+    int timer();
 
 
 
@@ -224,7 +224,13 @@ class Serranda : public abstractinterface
       Set_Address_PL(addt);
     }
 
-  
+    int get_percentuale(void){
+        precenttualeChange = 0;
+        return stato_percentuale;
+    }
+
+    uint8_t precenttualeChange = 0;
+
   private:
     Interfaccia* _interfaccia;
 
@@ -235,6 +241,12 @@ class Serranda : public abstractinterface
     unsigned long timer_discesa_=4000;
 
     int stato_percentuale=0;
+
+    uint8_t _STATO = 0;
+    unsigned long timeSTART;
+
+
+
 };
 
 class GruppoSwitch : public abstractinterface
