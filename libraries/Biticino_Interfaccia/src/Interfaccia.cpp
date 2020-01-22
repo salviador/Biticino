@@ -670,6 +670,10 @@ void Serranda::Reset_timer_flag(void){
 
 void Serranda::action(int value_percent){
    //stato_percentuale //stato attuale
+  Serial.print("Serranda action percentuale: ");
+  Serial.println(value_percent);
+
+
   int action = value_percent - stato_percentuale;
 
   Serial.print("Serranda action: ");
@@ -692,9 +696,22 @@ int Serranda::timer(void){
   if(timer_flag==1){
     //Salita
     if((millis()-TIMER_)>=calcolo_stop_){
+      unsigned long savetime_esplaw = (millis()-TIMER_);
+
       Stop();
 
-      float calcoloperc = (100.0 / (float)timer_salita_) * (float)(millis()-TIMER_);
+      unsigned long calcoloperc = (100.0 / (unsigned long)timer_salita_) * savetime_esplaw;
+      Serial.print("Serranda stato [calcoloperc]: ");
+      Serial.print(calcoloperc);
+      Serial.print("  ");
+      Serial.print(timer_salita_);
+      Serial.print(millis());
+      Serial.print("  ");
+      Serial.print(TIMER_);
+      Serial.print("  ");
+      Serial.println(savetime_esplaw);
+      
+
       int deltaPercentuale = (int)calcoloperc;
       stato_percentuale = stato_percentuale + deltaPercentuale;
       if(stato_percentuale > 100){
@@ -716,9 +733,22 @@ int Serranda::timer(void){
   }else if(timer_flag == -1){
     //Discesa
     if((millis()-TIMER_)>=calcolo_stop_){
+      unsigned long savetime_esplaw = (millis()-TIMER_);
+
       Stop();
 
-      float calcoloperc = (100.0 / (float)timer_discesa_) * (float)(millis()-TIMER_);
+      unsigned long calcoloperc = (100.0 / (unsigned long)timer_discesa_) * savetime_esplaw;
+      Serial.print("Serranda stato [calcoloperc]: ");
+      Serial.print(calcoloperc);
+      Serial.print("  ");
+      Serial.print(timer_salita_);
+      Serial.print(millis());
+      Serial.print("  ");
+      Serial.print(TIMER_);
+      Serial.print("  ");
+      Serial.println(savetime_esplaw);
+
+
       int deltaPercentuale = (int)calcoloperc;
       stato_percentuale = stato_percentuale - deltaPercentuale;
       if(stato_percentuale < 0){
