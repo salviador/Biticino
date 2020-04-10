@@ -20,9 +20,11 @@ enum TYPE_INTERfACCIA {
   TEMPERATURE_SENSOR,
   THERMOSTAT,
   SERRATURA,
-  CAMPANELLO
+  CAMPANELLO,
+  DIMMER
 };
 typedef enum TYPE_INTERfACCIA TYPE_INTERfACCIA_t ;
+
 
 
 
@@ -331,6 +333,39 @@ class Campanello : public abstractinterface
 
 
 
+class Dimmer : public abstractinterface
+{
+  public:
+  
+    Dimmer(Interfaccia* i);
+
+    //COMANDI  
+    void On();
+    void Off();
+    void Toggle();
+    void dimmer_value(uint8_t percent);
+    uint8_t Stato();
+    uint8_t Get_Percent();
+    
+    void address(const uint8_t A, const uint8_t PL){
+      Set_Address_A(A);
+      Set_Address_PL(PL);
+    }
+    void address(const uint8_t A_PL){
+      uint8_t addt;
+      addt = A_PL & 0xF0;
+      addt = addt >> 4;
+      addt = addt & 0x0F;
+      Set_Address_A(addt);
+      addt = A_PL & 0x0F;
+      Set_Address_PL(addt);
+    }
+
+
+  private:
+    Interfaccia* _interfaccia; 
+    
+};
 
 
 

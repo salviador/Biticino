@@ -10,7 +10,11 @@ void ACCENDI(String deviceId);
 void SPEGNI(String deviceId);
 
 
-Interfaccia interfaccia(D6,D7);                            //D6"ESP"=TX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
+//SCHEDA GIALLA !!
+//Interfaccia interfaccia(D6,D7);                            //D6"ESP"=TX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
+                                                           //D7"ESP"=RX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
+//SCHEDA VERDE !!
+Interfaccia interfaccia(D7,D6);                            //D6"ESP"=TX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
                                                            //D7"ESP"=RX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
 
                                                            //Aggiungere i Dispositivi Interfaccia
@@ -50,6 +54,7 @@ TemperatureSensor sensore_zona_Notte(&interfaccia);               //Sensori temp
 */
 Thermostat termostato(&interfaccia);                              //Termostato
 
+Dimmer dimmerTest(&interfaccia);
 
 // ------------------------------------------------------------------------------------------------
 
@@ -64,6 +69,7 @@ Thermostat termostato(&interfaccia);                              //Termostato
 
 #define ID_TERMOSTATO                 "thermostat-001"
 
+#define DIMMER_TEST_ID                "dimmer-001"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -80,7 +86,11 @@ void ACCENDI(String deviceId) {
   {  
     Serial.println("Accendo Led2");    
     Led2.On();
-  } 
+  } else  if (deviceId == DIMMER_TEST_ID  )
+  {  
+    Serial.println("Accendo DIMMER");    
+    dimmerTest.On();
+  }  
 }
 
                                                             //Funzione SPEGNI LUCI, i dispositivi richiesti da Alexa
@@ -96,8 +106,28 @@ void SPEGNI(String deviceId) {
   {  
     Serial.println("Spegno Led2");        
     Led2.Off();
-  }   
+  }else if (deviceId == DIMMER_TEST_ID  )
+  {  
+    Serial.println("Spegno DIMMER");        
+    dimmerTest.Off();
+  }    
 }
+
+
+
+//Alexa -> Gestione Comando DIMMER
+
+void DIMMER_CHANGE_PERCENT(String deviceId, uint8_t percent){
+  
+  if (deviceId == DIMMER_TEST_ID )
+  {  
+    Serial.print("Dimmer: ");    
+    Serial.println(percent);    
+    dimmerTest.dimmer_value(percent);
+  }   
+  
+}
+
 
 
 //Alexa -> Gestione Comando SERRANDA
@@ -115,7 +145,7 @@ void ALEXA_SERRANDA(String deviceID, int valore){
       Serial.println("Serranda action.....");                 
       serranda_Sala.action(valore);
     }else if(valore < 0){
-      serranda_Sala.action(-valore);
+       serranda_Sala.Abbassa(0);
     }    
   }
 }
@@ -204,6 +234,9 @@ void setup() {
   sensore_zona_Notte.Request();
 
   termostato.address(1);  
+
+  dimmerTest.address(1,4);            //comando      indirizzo(AMB1-PL1) N1     
+
 }
 
 
@@ -235,6 +268,26 @@ void loop() {
   }
 
 
+  //Aggiorna lo stato del dimmer
+  
+ if(dimmerTest.Is_Change_Stato()){                      //DIMMER cambio di stato
+      Serial.println("STATO CAMBIATO del DIMMER");
+      if(dimmerTest.Get_Stato() == 0){              
+        Serial.println("<ON>");
+        send_state_to_Alexa_synchronous(DIMMER_TEST_ID,"Alexa.PowerController", "ON");          //INDIRIZZO DISPOSITIVO ASSEGNATO        
+      }else if(dimmerTest.Get_Stato() == 1) {
+        Serial.println("<OFF>");      
+        send_state_to_Alexa_synchronous(DIMMER_TEST_ID,"Alexa.PowerController", "OFF");          //INDIRIZZO DISPOSITIVO ASSEGNATO
+      }else{
+        Serial.println("<Change percent>");      
+        send_state_to_Alexa_synchronous(DIMMER_TEST_ID,"Alexa.PowerController", "ON");          //INDIRIZZO DISPOSITIVO ASSEGNATO            
+        String sendT = DIMMER_TEST_ID;
+        sendT = sendT  + "_S";
+        send_state_to_Alexa_synchronous(sendT,"Alexa.BrightnessController", String(dimmerTest.Get_Percent()));          //INDIRIZZO DISPOSITIVO ASSEGNATO
+    
+      }
+  }
+    
 
   
   //x Aggiornare lo STATO dei TERMOSTATI

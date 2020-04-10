@@ -6,6 +6,7 @@ extern void ACCENDI(String deviceId);
 extern void SPEGNI(String deviceId);
 extern void TERMOSTATO_IMPOSTA_TEMPERATURA(String deviceId, float target_temp, char mode);
 extern void TERMOSTATO_IMPOSTA_MODO(String deviceId, String t_mode);
+extern void DIMMER_CHANGE_PERCENT(String deviceId, uint8_t percent);
 
 
 extern Interfaccia interfaccia;                            //D6"ESP"=TX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
@@ -43,7 +44,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
       ACCENDI(deviceID);
     }else if(deviceStato == "TurnOff"){
       SPEGNI(deviceID);      
-    }    
+    }   
+  }else if(deviceTipo == "Alexa.BrightnessController"){                       //DIMMER
+    if(deviceStato == "SetBrightness") { 
+      String p = jsonBuffer["p"];
+      uint8_t vp = p.toInt();
+      DIMMER_CHANGE_PERCENT(deviceID,vp);
+    }else if(deviceStato == ""){
+    }       
   }else if(deviceTipo == "Alexa.ThermostatController"){                             //TERMOSTATO
     if(deviceStato == "mode") { 
       String mod = jsonBuffer["m"];
@@ -105,6 +113,7 @@ void setup_wifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {

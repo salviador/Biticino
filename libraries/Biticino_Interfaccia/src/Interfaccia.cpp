@@ -1,6 +1,7 @@
 #include "Interfaccia.h"
 
 
+uint8_t _pValueDimmer[12] = {0x01, 0x0D,0x1D,0x2D,0x3D,0x4D,0x5D,0x6D,0x7D,0x8D,0x9D};
 
 union
 {
@@ -136,6 +137,22 @@ void Interfaccia::Loop_Seriale(){
         TYPE_INTERfACCIA_t t = _interfacee[i]->Get_Type();
         //Leggi contenuto della seriale e aggiorna stato dispositivi interfaccie
         if(t==SWITCH){
+          //Vedi se la risposta della seriale � compatibile con questo indirizzo
+          
+          addA = _interfacee[i]->Get_Address_A();
+          addPL = _interfacee[i]->Get_Address_PL();
+          //[Codifica add]
+          add = 0;
+          add = (addA & 0x0F);
+          add = add << 4;
+          add = add & 0xF0;
+          add = add | addPL;
+
+          if(add == BYTE_TRAMA[2]){	//A+PL corisponde
+             _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);
+			// Serial.println(" _interfacee[i]->Set_Stato(BYTE_TRAMA[4]);");
+          }	
+        }else if(t==DIMMER){
           //Vedi se la risposta della seriale � compatibile con questo indirizzo
           
           addA = _interfacee[i]->Get_Address_A();
@@ -542,6 +559,134 @@ uint8_t Switch::Stato(void){
   stato_rele = 1;
   if(Get_Stato() == 1){
     stato_rele = 0;
+  }
+  return stato_rele;
+}
+
+    
+//Dimmer, Attuatore!    
+//Dimmer, Attuatore!    
+//Dimmer, Attuatore!    
+//Dimmer, Attuatore!    
+    
+Dimmer::Dimmer(Interfaccia* i){
+  Set_Type(DIMMER);
+  _interfaccia = i;
+
+  _interfaccia->Add_Obj_Interface(this);
+  Set_Stato(0);
+  Reset_Change_Stato();
+}
+void Dimmer::On(void){
+  uint8_t stato_rele=0;
+    Serial.println("Accendo Dimmer");
+
+  stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 0, 1);
+  Set_Stato(stato_rele);
+  Reset_Change_Stato();
+}
+void Dimmer::Off(void){
+  uint8_t stato_rele=1;
+
+    Serial.println("Spegno Dimmer");    
+
+  stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), 1, 1);
+  Set_Stato(stato_rele);
+  Reset_Change_Stato();
+}
+void Dimmer::Toggle(void){
+  uint8_t stato_rele;
+  uint8_t stato_dimmer = Get_Stato();
+  if((stato_dimmer > 1)|(stato_dimmer == 0)){ 
+    //Acceso con dimmerazione -> Spegni
+    stato_rele = 1;
+  }else{
+    stato_rele = 0;
+  }
+  stato_rele = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), stato_rele, 1);
+  Set_Stato(stato_rele);
+  Reset_Change_Stato();
+}
+uint8_t Dimmer::Stato(void){
+  uint8_t stato_rele;
+  uint8_t stato_dimmer = Get_Stato();
+
+  if(stato_dimmer > 1){ 
+    //Acceso con dimmerazione
+    stato_rele = stato_dimmer;
+  }else if(stato_dimmer == 0){
+    //Acceso 
+    stato_rele = 1;
+  }else{
+    //Spento    == 1
+    stato_rele = 0;
+  }
+  return stato_rele;
+}
+void Dimmer::dimmer_value(uint8_t percent){
+  //0-100 in 10-80
+  uint8_t percentt = map(percent,0,100,10,80);
+
+  uint8_t stato_rele=0;
+  uint8_t stato_relex=0;
+
+  uint8_t v = percentt / 10;
+  uint8_t vd = _pValueDimmer[v];
+
+  stato_relex = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), vd, 1);
+  Set_Stato(vd);
+  Reset_Change_Stato();
+}
+
+uint8_t Dimmer::Get_Percent(){
+  uint8_t stato_rele;
+  uint8_t percent=0;
+  uint8_t stato_dimmer = Get_Stato();
+
+  if(stato_dimmer == 0){
+    //Acceso 
+    stato_rele = 1;
+  }else if(stato_dimmer == 1){
+    //Spento    == 1
+    stato_rele = 0;
+  }else if(stato_dimmer > 1){ 
+    //Acceso con dimmerazione
+    //Converti in percentuale 0-100
+    switch(stato_dimmer){
+      case 0x0D:
+        stato_rele = 10;
+      break;
+      case 0x1D:
+        stato_rele = 20;
+      break;
+      case 0x2D:
+        stato_rele = 30;
+      break;
+      case 0x3D:
+        stato_rele = 40;
+      break;
+      case 0x4D:
+        stato_rele = 50;
+      break;
+      case 0x5D:
+        stato_rele = 60;
+      break;
+      case 0x6D:
+        stato_rele = 70;
+      break;
+      case 0x7D:
+        stato_rele = 80;
+      break;
+      case 0x8D:
+        stato_rele = 90;
+      break;
+      case 0x9D:
+        stato_rele = 100;
+      break;
+      default:
+        stato_rele = 10;
+      break;
+    }
   }
   return stato_rele;
 }
