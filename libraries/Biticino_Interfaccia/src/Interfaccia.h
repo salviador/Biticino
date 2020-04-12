@@ -123,7 +123,7 @@ class Interfaccia
     
   private:
     int _ctn_interfacee;
-    abstractinterface* _interfacee[40];
+    abstractinterface* _interfacee[60];
 
 
     //Gestione Seriale

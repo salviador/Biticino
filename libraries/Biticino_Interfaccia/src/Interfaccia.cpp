@@ -625,7 +625,16 @@ uint8_t Dimmer::Stato(void){
 }
 void Dimmer::dimmer_value(uint8_t percent){
   //0-100 in 10-80
-  uint8_t percentt = map(percent,0,100,10,80);
+  //uint8_t percentt = map(percent,0,100,10,80);
+  if(percent > 80){
+    percent = 80;
+  }
+  if(percent < 20){
+    percent = 20;
+  }
+  uint8_t percentt = percent;
+
+
 
   uint8_t stato_rele=0;
   uint8_t stato_relex=0;
