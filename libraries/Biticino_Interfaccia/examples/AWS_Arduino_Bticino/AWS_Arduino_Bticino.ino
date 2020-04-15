@@ -144,7 +144,7 @@ void ALEXA_SERRANDA(String deviceID, int valore){
     }else if((valore > 0)&(valore < 100)){
       Serial.println("Serranda action.....");                 
       serranda_Sala.action(valore);
-    }else if(valore < 0){
+    }else if(valore <= 0){
        serranda_Sala.Abbassa(0);
     }    
   }
