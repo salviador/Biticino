@@ -25,7 +25,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   */
 
   //https://arduinojson.org/v6/doc/upgrade/
-  DynamicJsonDocument jsonBuffer(255);         
+  DynamicJsonDocument jsonBuffer(512);         
   auto error = deserializeJson(jsonBuffer, (char*)payload);
   if (error) {
     Serial.print(F("deserializeJson() failed with code "));
@@ -203,22 +203,24 @@ void setup_certificate(void){
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 void send_state_to_Alexa_synchronous(String deviceId , String tipo, String stato){
-  DynamicJsonDocument root(150);
-  char output[128];
+  if (client.connected()) {
+	  DynamicJsonDocument root(256);
+	  char output[256];
 
-  root["id"] = deviceId;
-  root["stato"] = stato;
-  root["tipo"] = tipo;
-  //root.printTo(databuf);
-  serializeJson(root, output);
-  client.publish("ESP8266/in", output);
+	  root["id"] = deviceId;
+	  root["stato"] = stato;
+	  root["tipo"] = tipo;
+	  //root.printTo(databuf);
+	  serializeJson(root, output);
+	  client.publish("ESP8266/in", output);
+	}
 }
 
 
 
 void send_Event_Campanello(void){
   DynamicJsonDocument root(150);
-  char output[128];
+  char output[150];
 
   root["id"] = "doorbell-01";
   root["stato"] = "PHYSICAL_INTERACTION";
