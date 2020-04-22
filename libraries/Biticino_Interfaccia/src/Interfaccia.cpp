@@ -626,21 +626,25 @@ uint8_t Dimmer::Stato(void){
 void Dimmer::dimmer_value(uint8_t percent){
   //0-100 in 10-80
   //uint8_t percentt = map(percent,0,100,10,80);
-  if(percent > 80){
-    percent = 80;
+  if(percent > 100){
+    percent = 100;
   }
   if(percent < 20){
     percent = 20;
   }
   uint8_t percentt = percent;
 
-
+  //Serial.print("Dimmer Set: ");
+  //Serial.println(percentt);
 
   uint8_t stato_rele=0;
   uint8_t stato_relex=0;
 
   uint8_t v = percentt / 10;
   uint8_t vd = _pValueDimmer[v];
+
+  //Serial.print("Dimmer Set in hex: ");
+  //Serial.println(vd);
 
   stato_relex = _interfaccia->interfaccia_send_COMANDO(Get_Address_A(), Get_Address_PL(), vd, 1);
   Set_Stato(vd);
@@ -697,6 +701,14 @@ uint8_t Dimmer::Get_Percent(){
       break;
     }
   }
+
+  //Serial.print("Dimmer Get in hex: ");
+  //Serial.println(stato_dimmer);
+
+  //Serial.print("Dimmer Get in percent: ");
+  //Serial.println(stato_rele);
+
+
   return stato_rele;
 }
 
@@ -833,7 +845,7 @@ void Serranda::action(int value_percent){
   Serial.print("Serranda action: ");
   Serial.println(action);
 
-  if(action < 0){
+  if(action <= 0){
     Abbassa(action);
   }else if(action > 0){
     Alza(action);
