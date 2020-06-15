@@ -21,7 +21,7 @@
 //Interfaccia interfaccia(D6,D7);     
 
 //----> Per SCHEDA shield VERDE  <----
-Interfaccia interfaccia(D6,D7);     
+Interfaccia interfaccia(D7,D6);     
 
 //****************************************
 //****************************************
