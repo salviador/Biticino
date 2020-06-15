@@ -4,7 +4,22 @@
 
 #define LEN_TRAMA_SCS_BUS 7
 
-EspSoftwareSerial biticino = EspSoftwareSerial(D6,D7);
+//****************************************
+//****************************************
+//***************ATTENTIONE***************
+//****************************************
+//****************************************
+
+//----> Per SCHEDA shield GIALLA <----
+//EspSoftwareSerial biticino = EspSoftwareSerial(D6,D7);
+
+//----> Per SCHEDA shield VERDE  <----
+EspSoftwareSerial biticino = EspSoftwareSerial(D7,D6);
+
+//****************************************
+//****************************************
+//****************************************
+//****************************************
 
 
 

@@ -10,8 +10,25 @@
 
 
 
-Interfaccia interfaccia(D6,D7);                            //D6"ESP"=TX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
-                                                           //D7"ESP"=RX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
+
+//****************************************
+//****************************************
+//***************ATTENTIONE***************
+//****************************************
+//****************************************
+
+//----> Per SCHEDA shield GIALLA <----
+//Interfaccia interfaccia(D6,D7);     
+
+//----> Per SCHEDA shield VERDE  <----
+Interfaccia interfaccia(D6,D7);     
+
+//****************************************
+//****************************************
+//****************************************
+//****************************************
+
+
 
 Switch switch_Cucina(&interfaccia);               // comando interfaccia singolo N1
 Switch switch_Sala(&interfaccia);                 // comando interfaccia singolo N1

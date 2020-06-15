@@ -10,12 +10,25 @@ void ACCENDI(String deviceId);
 void SPEGNI(String deviceId);
 
 
-//SCHEDA GIALLA !!
-//Interfaccia interfaccia(D6,D7);                            //D6"ESP"=TX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
-                                                           //D7"ESP"=RX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
-//SCHEDA VERDE !!
-Interfaccia interfaccia(D7,D6);                            //D6"ESP"=TX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
-                                                           //D7"ESP"=RX INTERFACCIA SCS "CON INTERFACCIA NUOVA"
+
+
+//****************************************
+//****************************************
+//***************ATTENTIONE***************
+//****************************************
+//****************************************
+
+//----> Per SCHEDA shield GIALLA <----
+//Interfaccia interfaccia(D6,D7);     
+
+//----> Per SCHEDA shield VERDE  <----
+Interfaccia interfaccia(D6,D7);     
+
+//****************************************
+//****************************************
+//****************************************
+//****************************************
+
 
                                                            //Aggiungere i Dispositivi Interfaccia
 
